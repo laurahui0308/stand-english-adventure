@@ -3322,9 +3322,10 @@ function processDialogueAnswer(btn){
 }
 
 // ==================== SPEECH SYNTHESIS ====================
-var _ttsVoice = null;        // cached voice object
-var _ttsReady = false;       // voices have been checked
-var _ttsFailed = false;      // no TTS available at all
+var _ttsVoiceEN = null;       // cached English voice
+var _ttsVoiceZH = null;       // cached Chinese voice
+var _ttsReady = false;        // voices have been checked
+var _ttsFailed = false;       // no TTS available at all
 
 function initTTS(){
   if(_ttsReady) return;
@@ -3332,14 +3333,14 @@ function initTTS(){
   if(!('speechSynthesis' in window)){ _ttsFailed = true; return; }
   var voices = window.speechSynthesis.getVoices();
   if(voices.length > 0){
-    _ttsVoice = pickBestVoice(voices);
+    pickBestVoices(voices);
     return;
   }
   // Voices load async on Android — wait for them
   window.speechSynthesis.onvoiceschanged = function(){
     var v = window.speechSynthesis.getVoices();
     if(v.length > 0){
-      _ttsVoice = pickBestVoice(v);
+      pickBestVoices(v);
       // Test-speak to wake up the TTS engine
       try{
         var test = new SpeechSynthesisUtterance('a');
@@ -3351,15 +3352,15 @@ function initTTS(){
     }
   };
 }
-function pickBestVoice(voices){
-  // Prefer English, then Chinese, then any voice
+function pickBestVoices(voices){
   var en = null, zh = null;
   for(var i = 0; i < voices.length; i++){
     var v = voices[i];
     if(v.lang.indexOf('en') === 0 && !en) en = v;
     if(v.lang.indexOf('zh') === 0 && !zh) zh = v;
   }
-  return en || zh || voices[0];
+  _ttsVoiceEN = en || voices[0];
+  _ttsVoiceZH = zh || voices[0];
 }
 // Init TTS on first user tap
 document.addEventListener('click', function(){ initTTS(); }, {once: true});
@@ -3371,9 +3372,10 @@ function trySpeak(text, lang){
   try{
     if('speechSynthesis' in window){
       var u = new SpeechSynthesisUtterance(text);
-      if(_ttsVoice){ u.voice = _ttsVoice; }
+      var voice = (lang === 'zh-CN') ? _ttsVoiceZH : _ttsVoiceEN;
+      if(voice){ u.voice = voice; }
       else { u.lang = lang || 'en-US'; }
-      u.rate = (lang === 'zh-CN' || (_ttsVoice && _ttsVoice.lang.indexOf('zh') === 0)) ? 0.9 : 0.85;
+      u.rate = (lang === 'zh-CN') ? 0.9 : 0.85;
       u.pitch = 1; u.volume = 0.7;
       window.speechSynthesis.speak(u);
     }
@@ -3386,11 +3388,10 @@ function speakWordWithTranslation(en, zh){
     if('speechSynthesis' in window){
       var u1 = new SpeechSynthesisUtterance(en);
       var u2 = new SpeechSynthesisUtterance(zh);
-      if(_ttsVoice){
-        u1.voice = _ttsVoice; u2.voice = _ttsVoice;
-      } else {
-        u1.lang = 'en-US'; u2.lang = 'zh-CN';
-      }
+      if(_ttsVoiceEN){ u1.voice = _ttsVoiceEN; }
+      else { u1.lang = 'en-US'; }
+      if(_ttsVoiceZH){ u2.voice = _ttsVoiceZH; }
+      else { u2.lang = 'zh-CN'; }
       u1.rate = 0.85; u1.pitch = 1; u1.volume = 0.7;
       u2.rate = 0.9; u2.pitch = 1; u2.volume = 0.7;
       u1.onend = function(){ window.speechSynthesis.speak(u2); };
