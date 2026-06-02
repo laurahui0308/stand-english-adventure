@@ -2472,23 +2472,24 @@ function renderBattleScene(region, b){
   const bossNameEl = document.getElementById('boss-name');
   const bossHpNameEl = document.getElementById('boss-hp-name');
   if(bossIconEl) bossIconEl.textContent = region.bossIcon;
-  // Swap boss image based on region
+  // Swap boss image based on region — delay to ensure page is visible
   var bossImg = document.getElementById('boss-img');
   if(bossImg){
     var imgSrc = BOSS_IMG_MAP[region.id] || BOSS_IMG_MAP['tokyo'];
-    bossImg.style.display = 'none';
     bossImg.alt = region.boss;
-    // Preload image then show
-    var preload = new Image();
-    preload.onload = function(){
-      bossImg.src = imgSrc;
-      bossImg.style.display = 'block';
-    };
-    preload.onerror = function(){
-      bossImg.src = imgSrc;
-      bossImg.style.display = 'block';
-    };
-    preload.src = imgSrc;
+    // Wait one frame for page to become visible, then swap
+    requestAnimationFrame(function(){
+      var preload = new Image();
+      preload.onload = function(){
+        bossImg.src = imgSrc;
+        bossImg.style.display = 'block';
+      };
+      preload.onerror = function(){
+        bossImg.src = imgSrc;
+        bossImg.style.display = 'block';
+      };
+      preload.src = imgSrc;
+    });
   }
   // Update boss SVG icon
   
