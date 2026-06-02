@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+<!-- iOS Home Screen support -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="英语冒险">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<!-- Windows / Android -->
+<meta name="msapplication-TileColor" content="#0d0d1a">
+<meta name="theme-color" content="#0d0d1a">
+<title>替身英语冒险</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--pu:#1a0a2e;--p2:#2d1b69;--gd:#ffd700;--pk:#ff6b9d;--tl:#00d4aa;--rd:#ff2d55;--bg:#0d0d1a;--cb:rgba(45,27,105,0.6);--mg:#9b59b6;--or:#ff8c00}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:#fff;min-height:100vh}
+.container{max-width:480px;margin:0 auto;padding:16px;text-align:center}
+.mt{font-size:28px;font-weight:900;background:linear-gradient(135deg,var(--gd),var(--pk),var(--tl));-webkit-background-clip:text;-webkit-text-fill-color:transparent;padding:20px 0 5px}
+.mt-sub{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:4px;text-transform:uppercase;margin-top:-2px;margin-bottom:4px}
+
+/* STAND ENERGY BAR */
+.sb{background:rgba(255,255,255,0.1);border-radius:12px;padding:3px;margin:8px 0;border:1px solid var(--gd)}
+.sb-in{height:20px;border-radius:10px;background:linear-gradient(90deg,var(--pk),var(--gd),var(--tl));width:0%;transition:width .5s}
+.sl{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:4px}
+
+/* STAND EVOLUTION DISPLAY */
+.se-disp{background:linear-gradient(135deg,rgba(26,10,46,0.9),rgba(45,27,105,0.7));border:1px solid rgba(255,215,0,0.3);border-radius:14px;padding:8px 12px;margin:6px 0;display:flex;align-items:center;gap:10px;cursor:pointer}
+.se-disp:active{border-color:var(--gd)}
+.se-icon{font-size:24px;width:32px;text-align:center}
+.se-info{flex:1;text-align:left}
+.se-name{font-size:11px;font-weight:700;color:var(--gd)}
+.se-lv{font-size:10px;color:rgba(255,255,255,0.5)}
+.se-bar{margin-top:3px;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden}
+.se-fill{height:100%;background:linear-gradient(90deg,var(--gd),var(--or));border-radius:2px;transition:width .5s}
+.se-progress{font-size:9px;color:rgba(255,255,255,0.4);margin-left:4px;white-space:nowrap}
+
+/* DAILY CHALLENGE CARD */
+.dc-card{background:linear-gradient(135deg,rgba(0,212,170,0.08),rgba(255,107,157,0.08));border:1px solid rgba(255,215,0,0.25);border-radius:14px;padding:10px 12px;margin:8px 0;display:flex;align-items:center;gap:10px;cursor:pointer}
+.dc-card:active{border-color:var(--gd)}
+.dc-icon{font-size:22px;width:32px;text-align:center}
+.dc-info{flex:1;text-align:left}
+.dc-title{font-size:12px;font-weight:700;color:var(--tl)}
+.dc-streak{font-size:10px;color:rgba(255,255,255,0.5)}
+.dc-badge{font-size:10px;padding:3px 10px;border-radius:10px;background:var(--gd);color:#000;font-weight:700}
+
+/* STARS DISPLAY */
+.st{text-align:center;margin:6px 0 10px;font-size:20px;display:flex;align-items:center;justify-content:center;gap:4px}
+
+/* MENU */
+.mg{display:grid;gap:10px;margin-top:8px}
+.mb{display:flex;align-items:center;gap:16px;background:var(--cb);border:1px solid rgba(255,215,0,0.2);border-radius:16px;padding:18px 20px;cursor:pointer}
+.mb:active{transform:translateY(-2px);border-color:var(--gd)}
+.mi{font-size:32px;width:50px;text-align:center}
+.mf{flex:1;text-align:left}
+.mf h3{font-size:16px;font-weight:700;color:#fff}
+.mf p{font-size:12px;color:rgba(255,255,255,0.5)}
+.md{display:none}.md.a{display:block}
+.back{display:inline-flex;color:var(--gd);font-size:14px;cursor:pointer;margin-bottom:12px;padding:8px}
+
+/* FIGHT CARD */
+.wc{background:var(--cb);border:1px solid var(--gd);border-radius:20px;padding:30px 20px;margin-bottom:16px}
+.wd{font-size:36px;font-weight:900;margin:8px 0}
+.og{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ob{padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#fff;font-size:15px;cursor:pointer;font-family:inherit;text-align:center}
+.ob:active{background:rgba(255,215,0,0.15);border-color:var(--gd)}
+.ob.cr{background:rgba(0,212,170,0.3);border-color:var(--tl)}
+.ob.wr{background:rgba(255,45,85,0.3);border-color:var(--rd);animation:sk .3s}
+@keyframes sk{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.ob:disabled{opacity:.7}
+.pr{font-size:12px;color:rgba(255,255,255,0.4);margin:8px 0}
+.rc{background:var(--cb);border:1px solid var(--gd);border-radius:20px;padding:24px;margin:16px 0}
+.bc{display:flex;align-items:center;gap:14px;background:var(--cb);border:1px solid rgba(255,215,0,0.2);border-radius:16px;padding:14px 16px;cursor:pointer;margin-bottom:10px;text-align:left}
+.bc:active{border-color:var(--gd)}.bc.l{opacity:.4;pointer-events:none}
+.be{font-size:36px;width:48px;text-align:center}.bi{flex:1}
+.bi h3{font-size:15px;font-weight:700}.bi p{font-size:11px;color:rgba(255,255,255,0.4)}
+.bb{font-size:11px;padding:4px 10px;border-radius:10px}
+.bb.g{background:var(--gd);color:#000}.bb.c{background:var(--tl);color:#000}.bb.l{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.4)}
+
+/* BOSS HP */
+.bh{display:flex;align-items:center;gap:12px;margin-bottom:12px;text-align:left}.bnm{font-size:16px;font-weight:700;color:var(--gd)}
+.bho{background:rgba(255,45,85,0.2);border-radius:8px;height:14px;padding:2px;border:1px solid var(--rd)}
+.bhi{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--rd),var(--gd));transition:width .4s;min-width:4%}
+.bht{font-size:11px;color:rgba(255,255,255,0.5)}
+.pl{font-size:20px;display:flex;gap:4px}
+.ht-l{filter:grayscale(1);opacity:.3}
+
+/* READING */
+.rb{border:1px solid var(--tl);border-radius:16px;padding:20px;font-size:15px;line-height:1.8;text-align:left;background:var(--cb)}
+.trans-btn{display:inline-block;margin-top:10px;padding:4px 12px;border-radius:8px;border:1px solid var(--gd);color:var(--gd);font-size:12px;cursor:pointer}
+.trans-btn:active{background:rgba(255,215,0,0.1)}
+.translation{display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(0,212,170,0.1);font-size:13px;color:var(--tl)}
+.qi{padding:12px;margin-bottom:8px;text-align:left}
+.question-text{font-size:14px;font-weight:600;margin-bottom:8px}
+.qo{display:block;width:100%;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#fff;font-size:13px;cursor:pointer;text-align:left;font-family:inherit;margin-bottom:4px}
+.qo.cr{border-color:var(--tl);background:rgba(0,212,170,0.2)}
+.qo.wr{border-color:var(--rd);background:rgba(255,45,85,0.2)}
+
+/* DIALOGUE */
+.cb{border-radius:16px;padding:16px;margin-bottom:12px;background:var(--cb);text-align:left}
+.cbp{display:flex;gap:10px;margin-bottom:12px}.cbb{background:rgba(255,255,255,0.08);border-radius:12px 12px 12px 4px;padding:10px 14px;max-width:85%}
+.cbn{font-size:12px;color:var(--pk)}
+.cho{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,212,170,0.08);color:#fff;font-size:14px;cursor:pointer;text-align:left;font-family:inherit;margin-bottom:8px}
+.cho:active{border-color:var(--tl)}.cho.s{border-color:var(--gd);pointer-events:none;background:rgba(255,215,0,0.15)}
+.cf{font-size:13px;color:var(--gd);margin-top:4px;padding:6px;text-align:center}
+
+/* OVERLAYS */
+.or{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;pointer-events:none;animation:of .8s forwards}
+@keyframes of{0%{opacity:1;transform:scale(.8)}100%{opacity:0;transform:scale(1.5)}}
+.sro{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;animation:ri .5s}
+@keyframes ri{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* EVOLUTION OVERLAY */
+.evo-overlay{position:fixed;inset:0;z-index:300;background:radial-gradient(ellipse at center,rgba(255,215,0,0.15),rgba(26,10,46,0.95));display:flex;flex-direction:column;align-items:center;justify-content:center;animation:evoIn .8s}
+@keyframes evoIn{0%{opacity:0;transform:scale(0.3)}50%{opacity:1;transform:scale(1.1)}100%{transform:scale(1)}}
+.evo-title{font-size:14px;color:rgba(255,255,255,0.5);letter-spacing:6px;text-transform:uppercase;margin-bottom:10px}
+.evo-icon{font-size:64px;margin-bottom:10px;animation:evoGlow 1s ease-in-out infinite alternate}
+@keyframes evoGlow{from{filter:drop-shadow(0 0 5px var(--gd))}to{filter:drop-shadow(0 0 20px var(--gd))}}
+.evo-name{font-size:32px;font-weight:900;background:linear-gradient(135deg,var(--gd),var(--pk),var(--tl));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.evo-jp{font-size:18px;color:rgba(255,255,255,0.4);font-style:italic;margin-bottom:16px}
+.evo-desc{font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:20px}
+.evo-btn{border:none;padding:10px 32px;border-radius:20px;border:2px solid var(--gd);background:transparent;color:var(--gd);font-size:14px;cursor:pointer;animation:evoPulse 1.5s infinite}
+@keyframes evoPulse{0%,100%{box-shadow:0 0 5px var(--gd)}50%{box-shadow:0 0 20px var(--gd)}}
+
+/* MENACING EFFECT */
+.menacing{position:fixed;z-index:150;pointer-events:none;font-size:14px;letter-spacing:8px;color:rgba(255,215,0,0.25);animation:menaFade 2s forwards}
+@keyframes menaFade{0%{opacity:1;transform:scale(0.5)}100%{opacity:0;transform:scale(2)}}
+
+/* DAILY QUIZ */
+.dq-blueprint{background:linear-gradient(135deg,rgba(0,212,170,0.05),rgba(155,89,182,0.05));border:1px solid rgba(0,212,170,0.2);border-radius:16px;padding:16px;margin-bottom:12px}
+.dq-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.dq-day{font-size:12px;color:var(--tl)}
+.dq-progress{font-size:11px;color:rgba(255,255,255,0.4)}
+.dq-streak-bar{display:flex;gap:4px;margin-bottom:12px;justify-content:center}
+.dq-streak-dot{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.1);display:inline-flex;align-items:center;justify-content:center;font-size:8px}
+.dq-streak-dot.active{background:var(--tl);color:#000}
+.dq-streak-dot.fire{background:var(--or);color:#000;animation:dqFire .5s ease-in-out infinite alternate}
+@keyframes dqFire{from{transform:scale(1)}to{transform:scale(1.2)}}
+
+/* EVOLUTION PAGE */
+.evo-page{text-align:center}
+.evo-current{background:linear-gradient(135deg,rgba(45,27,105,0.6),rgba(26,10,46,0.8));border:2px solid var(--gd);border-radius:20px;padding:20px;margin-bottom:16px}
+.evo-big-icon{font-size:72px;margin-bottom:8px}
+.evo-big-name{font-size:28px;font-weight:900;color:var(--gd);margin-bottom:4px}
+.evo-big-jp{font-size:16px;color:rgba(255,255,255,0.3);margin-bottom:8px}
+.evo-big-lv{font-size:14px;color:var(--tl)}
+.evo-list{display:grid;gap:8px}
+.evo-item{display:flex;align-items:center;gap:12px;background:var(--cb);border-radius:12px;padding:10px 14px;border:1px solid rgba(255,255,255,0.08)}
+.evo-item.locked{opacity:0.4;filter:grayscale(0.5)}
+.evo-item.current{border-color:var(--gd)}
+.evo-item-icon{font-size:24px;width:30px;text-align:center}
+.evo-item-info{flex:1;text-align:left}
+.evo-item-name{font-size:13px;font-weight:700;color:#fff}
+.evo-item-jp{font-size:10px;color:rgba(255,255,255,0.3)}
+.evo-item-stars{font-size:10px;color:var(--gd)}
+
+/* UTILITY */
+.bo{border:none;margin-top:16px;padding:10px 32px;border-radius:20px;border:2px solid var(--gd);background:transparent;color:var(--gd);font-size:14px;cursor:pointer}
+.sk{border:none;margin:6px;padding:10px 28px;border-radius:20px;border:2px solid var(--gd);background:transparent;color:var(--gd);font-size:13px;cursor:pointer}
+.sk:active{background:var(--gd);color:#000}
+</style></head><body>
+<div class="container" id="app">
+<div class="mt">STAND ENGLISH ADVENTURE</div>
+<div class="mt-sub">— JOJO STYLE ENGLISH LEARNING —</div>
+
+<!-- STAND ENERGY BAR -->
+<div class="sb"><div class="sl"><span>STAND ENERGY</span><span id="sp">0%</span></div><div class="sb-in" id="sBar"></div></div>
+
+<!-- STAND EVOLUTION DISPLAY -->
+<div class="se-disp" id="seDisp" onclick="showEvolution()">
+  <div class="se-icon" id="seIcon">💤</div>
+  <div class="se-info">
+    <div class="se-name" id="seName">DORMANT</div>
+    <div class="se-lv" id="seLv">Lv.0 — 眠りし者</div>
+    <div class="se-bar"><div class="se-fill" id="seFill" style="width:0%"></div></div>
+  </div>
+  <div class="se-progress" id="seProg">0/50</div>
+</div>
+
+<!-- STARS -->
+<div class="st">⭐ <span id="stC">0</span> <span style="font-size:12px;color:rgba(255,255,255,0.3)">|</span> <span style="font-size:12px;color:var(--tl)" id="seTotal">Total: 0</span></div>
+
+<!-- DAILY CHALLENGE CARD -->
+<div class="dc-card" id="dcCard" onclick="startDaily()">
+  <div class="dc-icon">📅</div>
+  <div class="dc-info">
+    <div class="dc-title">DAILY CHALLENGE</div>
+    <div class="dc-streak" id="dcStreak">🔥 0 days streak</div>
+  </div>
+  <div class="dc-badge" id="dcBadge">START</div>
+</div>
+
+<!-- MAIN MENU -->
+<div id="menu" class="md a"><div class="mg">
+<div class="mb" onclick="sm('w')"><div class="mi">⚔️</div><div class="mf"><h3>BOSS BATTLE</h3><p>Defeat bosses and earn stars!</p></div></div>
+<div class="mb" onclick="sm('r')"><div class="mi">📖</div><div class="mf"><h3>READING TRIAL</h3><p>Read stories and answer questions</p></div></div>
+<div class="mb" onclick="sm('s')"><div class="mi">💬</div><div class="mf"><h3>DIALOGUE</h3><p>Practice real conversations</p></div></div>
+</div></div>
+
+<!-- MODULES -->
+<div id="wM" class="md"><div class="back" onclick="sm('m')">◀ Back</div><div id="wC"></div></div>
+<div id="rM" class="md"><div class="back" onclick="sm('m')">◀ Back</div><div id="rC"></div></div>
+<div id="sM" class="md"><div class="back" onclick="sm('m')">◀ Back</div><div id="sC"></div></div>
+<div id="eM" class="md"><div class="back" onclick="sm('m')">◀ Back</div><div id="eC"></div></div>
+<div id="dM" class="md"><div class="back" onclick="sm('m')">◀ Back</div><div id="dC"></div></div>
+</div>
+
+<script>
+
+// ============ SOUND SYSTEM ============
+const SOUND = {
+  ctx: null,
+  _init() {
+    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  _play(f, d, t, v) {
+    try {
+      this._init();
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type = t || 'square';
+      o.frequency.setValueAtTime(f, this.ctx.currentTime);
+      g.gain.setValueAtTime(v || 0.15, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + d);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + d);
+    } catch(e) {}
+  },
+  _noise(d, v) {
+    try {
+      this._init();
+      const b = this.ctx.createBuffer(1, this.ctx.sampleRate * d, this.ctx.sampleRate);
+      const p = b.getChannelData(0);
+      for (let i = 0; i < p.length; i++) p[i] = (Math.random() * 2 - 1) * (v || 0.08);
+      const s = this.ctx.createBufferSource();
+      const g = this.ctx.createGain();
+      s.buffer = b;
+      g.gain.setValueAtTime(v || 0.08, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + d);
+      s.connect(g); g.connect(this.ctx.destination);
+      s.start();
+    } catch(e) {}
+  },
+  correct() { this._play(523, 0.1); setTimeout(() => this._play(659, 0.1), 80); setTimeout(() => this._play(784, 0.2), 160); },
+  wrong() { this._play(200, 0.3, 'sawtooth', 0.1); },
+  click() { this._play(800, 0.04, 'sine', 0.05); },
+  bossHit() { this._play(300, 0.15, 'sawtooth', 0.12); },
+  bossDefeat() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => this._play(f, 0.25), i * 120)); },
+  standRush() {
+    for (let i = 0; i < 8; i++) {
+      setTimeout(() => this._play(200 + Math.random() * 400, 0.08), i * 80);
+      setTimeout(() => this._noise(0.05, 0.1), i * 80);
+    }
+  },
+  combo(c) { const b = 400 + Math.min(c, 8) * 50; for (let i = 0; i < Math.min(c, 5); i++) setTimeout(() => this._play(b + i * 60, 0.08), i * 60); },
+  evolve() {
+    [262, 330, 392, 523, 659, 784, 1047].forEach((f, i) => setTimeout(() => this._play(f, 0.3, 'sine', 0.15), i * 150));
+  },
+};
+
+// ============ WORDS DATA ============
+// Lv.1 Basic (items 1-5 per theme): Short, concrete, everyday words
+// Lv.2 Intermediate (items 6-10): Medium length, abstract nouns, verbs
+// Lv.3 Advanced (items 11-15): Longer words, adjectives, complex concepts
+const WORDS = [
+// === ANIMALS (Lv.1) ===
+{en:'crocodile',zh:'Crocodile',ph:'/krɒkədaɪl/',tp:'animals'},
+{en:'dolphin',zh:'Dolphin',ph:'/dɒlfɪn/',tp:'animals'},
+{en:'giraffe',zh:'Giraffe',ph:'/dʒəræf/',tp:'animals'},
+{en:'parrot',zh:'Parrot',ph:'/pærət/',tp:'animals'},
+{en:'reptile',zh:'Reptile',ph:'/reptaɪl/',tp:'animals'},
+// ANIMALS (Lv.2)
+{en:'elephant',zh:'Elephant',ph:'/elɪfənt/',tp:'animals'},
+{en:'penguin',zh:'Penguin',ph:'/peŋɡwɪn/',tp:'animals'},
+{en:'butterfly',zh:'Butterfly',ph:'/bʌtərflaɪ/',tp:'animals'},
+{en:'squirrel',zh:'Squirrel',ph:'/skwɪrəl/',tp:'animals'},
+{en:'tiger',zh:'Tiger',ph:'/taɪɡər/',tp:'animals'},
+// ANIMALS (Lv.3)
+{en:'whale',zh:'Whale',ph:'/weɪl/',tp:'animals'},
+{en:'eagle',zh:'Eagle',ph:'/iːɡl/',tp:'animals'},
+{en:'kangaroo',zh:'Kangaroo',ph:'/kæŋɡəruː/',tp:'animals'},
+{en:'octopus',zh:'Octopus',ph:'/ɒktəpəs/',tp:'animals'},
+{en:'camel',zh:'Camel',ph:'/kæml/',tp:'animals'},
+// === FOOD (Lv.1) ===
+{en:'bake',zh:'Bake',ph:'/beɪk/',tp:'food'},
+{en:'dessert',zh:'Dessert',ph:'/dɪˈzɜːrt/',tp:'food'},
+{en:'restaurant',zh:'Restaurant',ph:'/restrɑːnt/',tp:'food'},
+{en:'recipe',zh:'Recipe',ph:'/resɪpi/',tp:'food'},
+{en:'ingredient',zh:'Ingredient',ph:'/ɪnˈɡriːdiənt/',tp:'food'},
+// FOOD (Lv.2)
+{en:'breakfast',zh:'Breakfast',ph:'/brekfəst/',tp:'food'},
+{en:'lunch',zh:'Lunch',ph:'/lʌntʃ/',tp:'food'},
+{en:'dinner',zh:'Dinner',ph:'/dɪnər/',tp:'food'},
+{en:'sandwich',zh:'Sandwich',ph:'/sænwɪtʃ/',tp:'food'},
+{en:'salad',zh:'Salad',ph:'/sæləd/',tp:'food'},
+// FOOD (Lv.3)
+{en:'vegetable',zh:'Vegetable',ph:'/vedʒtəbl/',tp:'food'},
+{en:'fruit',zh:'Fruit',ph:'/fruːt/',tp:'food'},
+{en:'lemon',zh:'Lemon',ph:'/lemən/',tp:'food'},
+{en:'cheese',zh:'Cheese',ph:'/tʃiːz/',tp:'food'},
+{en:'snack',zh:'Snack',ph:'/snæk/',tp:'food'},
+// === SCHOOL (Lv.1) ===
+{en:'comprehension',zh:'Comprehension',ph:'/ˌkɒmprɪˈhenʃn/',tp:'school'},
+{en:'dictionary',zh:'Dictionary',ph:'/dɪkʃneri/',tp:'school'},
+{en:'examination',zh:'Exam',ph:'/ɪɡˌzæmɪˈneɪʃn/',tp:'school'},
+{en:'knowledge',zh:'Knowledge',ph:'/nɒlɪdʒ/',tp:'school'},
+{en:'vocabulary',zh:'Vocabulary',ph:'/vəˈkæbjəleri/',tp:'school'},
+// SCHOOL (Lv.2)
+{en:'teacher',zh:'Teacher',ph:'/tiːtʃər/',tp:'school'},
+{en:'student',zh:'Student',ph:'/stjuːdnt/',tp:'school'},
+{en:'lesson',zh:'Lesson',ph:'/lesn/',tp:'school'},
+{en:'homework',zh:'Homework',ph:'/hoʊmwɜːrk/',tp:'school'},
+{en:'classroom',zh:'Classroom',ph:'/klɑːsruːm/',tp:'school'},
+// SCHOOL (Lv.3)
+{en:'library',zh:'Library',ph:'/laɪbreri/',tp:'school'},
+{en:'subject',zh:'Subject',ph:'/sʌbdʒɪkt/',tp:'school'},
+{en:'experiment',zh:'Experiment',ph:'/ɪkˈsperɪmənt/',tp:'school'},
+{en:'education',zh:'Education',ph:'/ˌedʒuˈkeɪʃn/',tp:'school'},
+{en:'question',zh:'Question',ph:'/kwestʃən/',tp:'school'},
+// === NATURE (Lv.1) ===
+{en:'climate',zh:'Climate',ph:'/klaɪmət/',tp:'nature'},
+{en:'forecast',zh:'Forecast',ph:'/fɔːrkæst/',tp:'nature'},
+{en:'island',zh:'Island',ph:'/aɪlənd/',tp:'nature'},
+{en:'pollution',zh:'Pollution',ph:'/pəˈluːʃn/',tp:'nature'},
+{en:'volcano',zh:'Volcano',ph:'/vɒlˈkeɪnoʊ/',tp:'nature'},
+// NATURE (Lv.2)
+{en:'river',zh:'River',ph:'/rɪvər/',tp:'nature'},
+{en:'forest',zh:'Forest',ph:'/fɒrɪst/',tp:'nature'},
+{en:'desert',zh:'Desert',ph:'/dezərt/',tp:'nature'},
+{en:'ocean',zh:'Ocean',ph:'/oʊʃn/',tp:'nature'},
+{en:'mountain',zh:'Mountain',ph:'/maʊntn/',tp:'nature'},
+// NATURE (Lv.3)
+{en:'season',zh:'Season',ph:'/siːzn/',tp:'nature'},
+{en:'weather',zh:'Weather',ph:'/weðər/',tp:'nature'},
+{en:'environment',zh:'Environment',ph:'/ɪnˈvaɪrənmənt/',tp:'nature'},
+{en:'temperature',zh:'Temperature',ph:'/temprətʃər/',tp:'nature'},
+{en:'earthquake',zh:'Earthquake',ph:'/ɜːrθkweɪk/',tp:'nature'},
+// === DAILY (Lv.1) ===
+{en:'celebrate',zh:'Celebrate',ph:'/selɪbreɪt/',tp:'daily'},
+{en:'congratulate',zh:'Congratulate',ph:'/kənˈɡrætʃuleɪt/',tp:'daily'},
+{en:'imagine',zh:'Imagine',ph:'/ɪˈmædʒɪn/',tp:'daily'},
+{en:'interrupt',zh:'Interrupt',ph:'/ˌɪntəˈrʌpt/',tp:'daily'},
+{en:'permission',zh:'Permission',ph:'/pərˈmɪʃn/',tp:'daily'},
+// DAILY (Lv.2)
+{en:'weekend',zh:'Weekend',ph:'/wiːkend/',tp:'daily'},
+{en:'holiday',zh:'Holiday',ph:'/hɒlədeɪ/',tp:'daily'},
+{en:'birthday',zh:'Birthday',ph:'/bɜːrθdeɪ/',tp:'daily'},
+{en:'shower',zh:'Shower',ph:'/ʃaʊər/',tp:'daily'},
+{en:'mirror',zh:'Mirror',ph:'/mɪrər/',tp:'daily'},
+// DAILY (Lv.3)
+{en:'schedule',zh:'Schedule',ph:'/ʃedjuːl/',tp:'daily'},
+{en:'appointment',zh:'Appointment',ph:'/əˈpɔɪntmənt/',tp:'daily'},
+{en:'conversation',zh:'Conversation',ph:'/ˌkɒnvərˈseɪʃn/',tp:'daily'},
+{en:'medicine',zh:'Medicine',ph:'/medɪsn/',tp:'daily'},
+{en:'passenger',zh:'Passenger',ph:'/pæsɪndʒər/',tp:'daily'},
+// === EMOTIONS (Lv.1) ===
+{en:'appreciate',zh:'Appreciate',ph:'/əˈpriːʃieɪt/',tp:'emotions'},
+{en:'confident',zh:'Confident',ph:'/kɒnfɪdənt/',tp:'emotions'},
+{en:'curious',zh:'Curious',ph:'/kjʊriəs/',tp:'emotions'},
+{en:'disappointed',zh:'Disappointed',ph:'/ˌdɪsəˈpɔɪntɪd/',tp:'emotions'},
+{en:'embarrassed',zh:'Embarrassed',ph:'/ɪmˈbærəst/',tp:'emotions'},
+// EMOTIONS (Lv.2)
+{en:'happy',zh:'Happy',ph:'/hæpi/',tp:'emotions'},
+{en:'sad',zh:'Sad',ph:'/sæd/',tp:'emotions'},
+{en:'angry',zh:'Angry',ph:'/æŋɡri/',tp:'emotions'},
+{en:'scared',zh:'Scared',ph:'/skerd/',tp:'emotions'},
+{en:'surprised',zh:'Surprised',ph:'/sərˈpraɪzd/',tp:'emotions'},
+// EMOTIONS (Lv.3)
+{en:'proud',zh:'Proud',ph:'/praʊd/',tp:'emotions'},
+{en:'shy',zh:'Shy',ph:'/ʃaɪ/',tp:'emotions'},
+{en:'nervous',zh:'Nervous',ph:'/nɜːrvəs/',tp:'emotions'},
+{en:'jealous',zh:'Jealous',ph:'/dʒeləs/',tp:'emotions'},
+{en:'grateful',zh:'Grateful',ph:'/ɡreɪtfl/',tp:'emotions'}
+];
+
+// ============ STAND EVOLUTION TABLE ============
+const STAND_TIERS = [
+  {lv:0,stars:0,name:'DORMANT',jp:'眠りし者',icon:'💤',color:'rgba(255,255,255,0.3)'},
+  {lv:1,stars:50,name:'AWAKENED STAND',jp:'覚醒スタンド',icon:'🔥',color:'var(--pk)'},
+  {lv:2,stars:150,name:'SILVER CHARIOT',jp:'シルバーチャリオッツ',icon:'⚔️',color:'var(--tl)'},
+  {lv:3,stars:300,name:'GOLDEN EXPERIENCE',jp:'ゴールデンエクスペリエンス',icon:'✨',color:'var(--gd)'},
+  {lv:4,stars:500,name:'STAR PLATINUM',jp:'スタープラチナ',icon:'⭐',color:'var(--or)'},
+  {lv:5,stars:1000,name:'THE WORLD',jp:'ザ・ワールド',icon:'🌍',color:'var(--rd)'},
+];
+
+function getStandLevel(total) {
+  let result = STAND_TIERS[0];
+  for (let i = STAND_TIERS.length - 1; i >= 0; i--) {
+    if (total >= STAND_TIERS[i].stars) { result = STAND_TIERS[i]; break; }
+  }
+  return result;
+}
+
+function getNextTier(currentLv) {
+  if (currentLv >= STAND_TIERS.length - 1) return null;
+  return STAND_TIERS[currentLv + 1];
+}
+
+// ============ STATE ============
+var state = {
+  stars: parseInt(localStorage.getItem('seS') || '0'),
+  totalEarned: parseInt(localStorage.getItem('seT') || '0'),
+  combo: 0, maxC: parseInt(localStorage.getItem('seM') || '0'),
+  energy: parseInt(localStorage.getItem('seE') || '0'),
+  bossDone: JSON.parse(localStorage.getItem('seB') || '[]'),
+  curBoss: 0, bossHP: 0, bossLives: 3,
+  convDone: JSON.parse(localStorage.getItem('seCD') || '[]'),
+  convIdx: 0, convSc: 0, convSt: 0, convLock: false,
+  ri: 0, rs: 0, ra: {},
+  dailyDate: localStorage.getItem('seDD') || '',
+  dailyStreak: parseInt(localStorage.getItem('seDS') || '0'),
+  dailyDone: localStorage.getItem('seDDone') || '',
+  dailyIdx: 0, dailyStars: 0,
+  lastStandLv: parseInt(localStorage.getItem('seSL') || '0'),
+};
+
+function save() {
+  localStorage.setItem('seS', state.stars);
+  localStorage.setItem('seT', state.totalEarned);
+  localStorage.setItem('seE', state.energy);
+  localStorage.setItem('seM', Math.max(state.maxC, state.combo));
+  localStorage.setItem('seB', JSON.stringify(state.bossDone));
+  localStorage.setItem('seCD', JSON.stringify(state.convDone));
+  localStorage.setItem('seDD', state.dailyDate);
+  localStorage.setItem('seDS', state.dailyStreak);
+  localStorage.setItem('seDDone', state.dailyDone);
+  localStorage.setItem('seSL', getStandLevel(state.totalEarned).lv);
+}
+
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function addStars(n) {
+  state.stars += n;
+  state.totalEarned += n;
+  state.energy += n;
+  var prevLv = getStandLevel(state.totalEarned - n).lv;
+  var newLv = getStandLevel(state.totalEarned).lv;
+  if (state.energy >= 100) { state.energy = 0; sRush(); }
+  if (newLv > prevLv) {
+    setTimeout(function() { triggerEvolution(newLv); }, 600);
+  }
+  ui(); save();
+}
+
+function ui() {
+  var sc = document.getElementById('stC');
+  if (sc) sc.textContent = state.stars;
+  var sb = document.getElementById('sBar');
+  if (sb) sb.style.width = Math.min(state.energy, 100) + '%';
+  var sp = document.getElementById('sp');
+  if (sp) sp.textContent = Math.min(state.energy, 100) + '%';
+  updateStandDisplay();
+  updateDailyDisplay();
+  var st = document.getElementById('seTotal');
+  if (st) st.textContent = 'Total: ' + state.totalEarned;
+}
+
+// ============ STAND EVOLUTION UI ============
+function updateStandDisplay() {
+  var total = state.totalEarned;
+  var cur = getStandLevel(total);
+  var next = getNextTier(cur.lv);
+
+  var icon = document.getElementById('seIcon');
+  var name = document.getElementById('seName');
+  var lv = document.getElementById('seLv');
+  var fill = document.getElementById('seFill');
+  var prog = document.getElementById('seProg');
+
+  if (icon) icon.textContent = cur.icon;
+  if (name) name.textContent = cur.name;
+  if (lv) lv.textContent = 'Lv.' + cur.lv + ' — ' + cur.jp;
+
+  if (next) {
+    var progress = Math.min(100, Math.floor(((total - cur.stars) / (next.stars - cur.stars)) * 100));
+    if (fill) fill.style.width = progress + '%';
+    if (prog) prog.textContent = (total - cur.stars) + '/' + (next.stars - cur.stars);
+  } else {
+    if (fill) fill.style.width = '100%';
+    if (prog) prog.textContent = 'MAX';
+  }
+}
+
+function showEvolution() {
+  SOUND.click();
+  sm('e');
+  var total = state.totalEarned;
+  var cur = getStandLevel(total);
+  var h = '<div class="evo-page">';
+
+  // Current Stand
+  h += '<div class="evo-current">';
+  h += '<div class="evo-big-icon">' + cur.icon + '</div>';
+  h += '<div class="evo-big-name">' + cur.name + '</div>';
+  h += '<div class="evo-big-jp">' + cur.jp + '</div>';
+  h += '<div class="evo-big-lv">Lv.' + cur.lv + (cur.lv >= 5 ? ' — THE STRONGEST' : '') + '</div>';
+  h += '</div>';
+
+  // Progress to next
+  var next = getNextTier(cur.lv);
+  if (next) {
+    var need = next.stars - total;
+    h += '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:12px">' + need + ' more stars to ' + next.name + '</div>';
+  } else {
+    h += '<div style="font-size:13px;color:var(--gd);margin-bottom:12px">★ ALL MASTERY ACHIEVED ★</div>';
+  }
+
+  // All tiers
+  h += '<div class="evo-list">';
+  for (var i = 0; i < STAND_TIERS.length; i++) {
+    var t = STAND_TIERS[i];
+    var unlocked = total >= t.stars;
+    var cls = unlocked ? '' : ' locked';
+    if (t.lv === cur.lv) cls += ' current';
+    h += '<div class="evo-item' + cls + '">';
+    h += '<div class="evo-item-icon">' + (unlocked ? t.icon : '🔒') + '</div>';
+    h += '<div class="evo-item-info">';
+    h += '<div class="evo-item-name">' + t.name + '</div>';
+    h += '<div class="evo-item-jp">' + t.jp + '</div>';
+    h += '</div>';
+    h += '<div class="evo-item-stars">' + t.stars + '⭐</div>';
+    h += '</div>';
+  }
+  h += '</div></div>';
+
+  document.getElementById("eC").innerHTML = h;
+}
+
+function triggerEvolution(lv) {
+  var t = STAND_TIERS[lv];
+  SOUND.evolve();
+  state.lastStandLv = lv;
+  save();
+
+  var overlay = document.createElement('div');
+  overlay.className = 'evo-overlay';
+  overlay.innerHTML =
+    '<div class="evo-title">Stand Evolution</div>' +
+    '<div class="evo-icon">' + t.icon + '</div>' +
+    '<div class="evo-name">' + t.name + '</div>' +
+    '<div class="evo-jp">' + t.jp + '</div>' +
+    '<div class="evo-desc">Your Stand has evolved to Lv.' + lv + '!</div>' +
+    '<button class="evo-btn" onclick="this.parentElement.remove()">AWAKEN</button>';
+  document.body.appendChild(overlay);
+}
+
+// ============ MODULE SWITCH ============
+function sm(name) {
+  SOUND._init();
+  var mods = document.querySelectorAll('.md');
+  for (var i = 0; i < mods.length; i++) mods[i].classList.remove('a');
+  if (name === 'm') {
+    document.getElementById('menu').classList.add('a'); ui();
+    checkDailyReset();
+  }
+  else if (name === 'w') { document.getElementById('wM').classList.add('a'); bossSelect(); }
+  else if (name === 'r') { document.getElementById('rM').classList.add('a'); startRead(); }
+  else if (name === 's') { document.getElementById('sM').classList.add('a'); startConv(); }
+  else if (name === 'e') { document.getElementById('eM').classList.add('a'); showEvolution(); }
+  else if (name === 'd') { document.getElementById('dM').classList.add('a'); renderDaily(); }
+}
+
+// ============ STAND RUSH ============
+function sRush() {
+  var d = document.createElement('div');
+  d.className = 'sro';
+  d.innerHTML = '<div style="font-size:36px;font-weight:900;background:linear-gradient(135deg,var(--gd),var(--pk),var(--tl));-webkit-background-clip:text;-webkit-text-fill-color:transparent">STAND RUSH!</div><div style="font-size:24px;margin:12px">ORAAAAA!</div><div style="font-size:20px;color:var(--gd)">+10 Stars!</div><button class="bo" onclick="this.parentElement.remove()">Continue</button>';
+  document.body.appendChild(d);
+  addStars(10);
+  SOUND.standRush();
+}
+
+function ora() {
+  var e = document.createElement('div');
+  e.className = 'or';
+  e.style.left = (20 + Math.random() * 60) + '%';
+  e.style.top = (20 + Math.random() * 60) + '%';
+  e.innerHTML = '<div style="font-size:48px;font-weight:900;color:var(--gd)">ORA!</div>';
+  document.body.appendChild(e);
+  setTimeout(function() { e.remove(); }, 800);
+}
+
+function menacing() {
+  var e = document.createElement('div');
+  e.className = 'menacing';
+  e.style.left = (10 + Math.random() * 40) + '%';
+  e.style.top = (10 + Math.random() * 40) + '%';
+  e.innerHTML = 'ゴゴゴゴ';
+  document.body.appendChild(e);
+  setTimeout(function() { e.remove(); }, 2000);
+}
+
+// ============ READINGS ============
+// Lv.1 Easy (80-100 words): Simple sentences, present tense, fairy tale themes
+// Lv.2 Medium (100-130 words): Compound sentences, past tense, adventure themes
+// Lv.3 Hard (130-160 words): Clauses, mixed tenses, growth/philosophy themes
+const READINGS = [
+// === Lv.1 - The Brave Little Star (keep existing) ===
+{title:"The Brave Little Star",text:"Once upon a time, a little star named Sparkle lived in the sky. She was not very bright, and other stars often laughed at her. They said she was too small. Sparkle felt sad, but she did not give up. One night, a lost spaceship was flying in the dark. The other stars were too far away to help, but Sparkle shined with all her power. The spaceship said thank you. Sparkle learned that even a small light can make a big difference.",translation:"一颗小星星帮助了迷路的宇宙飞船，她明白了即使微小的光也能带来改变。",
+questions:[{q:"Why did stars laugh at Sparkle?",options:["Too noisy","Not bright enough","Too big","She ran away"],answer:1},{q:"What happened one night?",options:["A comet passed","A spaceship got lost","The moon fell","Sparkle left"],answer:1},{q:"What did Sparkle learn?",options:["Big stars are better","She should give up","Small light can help","The sky is scary"],answer:2}]},
+// === Lv.1 - The Color Thief (keep existing) ===
+{title:"The Color Thief",text:"Max was an artist who loved colors. One morning, all the colors in his town were gone. The sky was gray, the trees were gray. Max picked up his brush and started painting. He gave the sun its yellow, leaves their green, and flowers their red. As he painted, colors came back one by one. What matters is that we make the world beautiful together.",translation:"马克斯用画笔把消失的颜色一个一个画了回来。",
+questions:[{q:"What happened to Max's town?",options:["It rained","Colors disappeared","A storm came","Everyone left"],answer:1},{q:"How did Max fix it?",options:["Called for help","Used his brush","Bought new things","Moved away"],answer:1},{q:"What is the message?",options:["Colors are not important","Artists are special","Working together is beautiful","Gray is nice"],answer:2}]},
+// === Lv.1 - The Secret Garden Door (keep existing) ===
+{title:"The Secret Garden Door",text:"Lily found an old door behind a big tree in her backyard. She opened it and found a magical garden. The flowers could sing and butterflies could talk. A butterfly told her she could stay if she answered a riddle. I have cities but no houses. I have mountains but no trees. I have water but no fish. What am I? Lily answered: A map! The butterfly smiled and welcomed her.",translation:"莉莉发现了一扇神奇的门，门后是会说话的花园。",
+questions:[{q:"Where did Lily find the door?",options:["In her bedroom","Behind a big tree","At school","In a store"],answer:1},{q:"What was special?",options:["It was very big","Flowers could sing","Dark","Underwater"],answer:1},{q:"What was the riddle answer?",options:["A world","A book","A map","A dream"],answer:2}]},
+// === Lv.1 - The Little Penguin (NEW) ===
+{title:"The Little Penguin",text:"Pip was a little penguin who could not swim. His brothers and sisters jumped into the sea. Pip stood on the ice. He was scared. His mother said: Try your best. Pip closed his eyes and jumped. Splash! He opened his eyes underwater and saw fish and pretty rocks. He was swimming! Pip laughed. He was not scared anymore.",translation:"小企鹅皮普学会了游泳，明白了勇敢尝试就会成功。",
+questions:[{q:"Why did Pip not swim at first?",options:["He was tired","He was scared","The water was cold","He was sick"],answer:1},{q:"What did his mother say?",options:["Stay on the ice","Try your best","Go home","Swim faster"],answer:1},{q:"How did Pip feel at the end?",options:["Angry","Tired","Happy","Hungry"],answer:2}]},
+// === Lv.1 - The Happy Bicycle (NEW) ===
+{title:"The Happy Bicycle",text:"Tom got a new bicycle for his birthday. It was red and shiny. Tom wanted to ride it. But he fell off. Ouch! His knee hurt. He wanted to stop. His dad said: Do not give up. Tom got on again. He fell again and again. On the fifth time, he did not fall! He rode down the street. It was the best day ever.",translation:"汤姆学骑自行车摔了又摔，但没有放弃，终于学会了。",
+questions:[{q:"What did Tom get for his birthday?",options:["A toy","A bicycle","A book","A cake"],answer:1},{q:"What happened when Tom tried to ride?",options:["He rode fast","He fell off","He went home","He cried"],answer:1},{q:"What is the lesson?",options:["Bicycles are hard","Give up is OK","Do not give up","Riding is easy"],answer:2}]},
+// === Lv.2 - The Lost Kitten (NEW) ===
+{title:"The Lost Kitten",text:"Emma found a small orange kitten in her backyard. It was shaking and looked hungry. Emma gave it some milk. The kitten drank quickly. Emma wanted to keep it, but she knew someone might be looking for it. She made a poster with her mom. They put it up around the neighborhood. The next day, a little girl named Sara came to the door. She was crying. That is my cat, Mango! Emma felt happy that Mango went home.",translation:"艾玛捡到一只小橘猫，做了告示帮它找到了主人。",
+questions:[{q:"Where did Emma find the kitten?",options:["At school","In her backyard","At the park","In a store"],answer:1},{q:"What did Emma do first?",options:["Made a poster","Gave it milk","Called the police","Kept it"],answer:1},{q:"How did Emma feel at the end?",options:["Sad","Happy","Angry","Scared"],answer:1}]},
+// === Lv.2 - The Big Race (NEW) ===
+{title:"The Big Race",text:"It was sports day at school. Leo was in the running race. He was not very fast. His friends ran past him. Leo wanted to stop. Then he heard his friend Mia shouting: You can do it, Leo! He kept running. He passed one friend, then another. He crossed the finish line. He came in fourth place. No medal, but Mia gave him a high-five. Leo smiled. Winning is not everything. Trying your best is what matters.",translation:"运动会上利奥跑步得了第四名，但他明白了尽力比获奖更重要。",
+questions:[{q:"What was the event?",options:["Swimming","A running race","Jumping","Ball game"],answer:1},{q:"Who encouraged Leo?",options:["His teacher","His mom","Mia","The coach"],answer:2},{q:"What did Leo learn?",options:["Winning is everything","Running is easy","Trying your best matters","Friends are fast"],answer:2}]},
+// === Lv.2 - The Camping Trip (NEW) ===
+{title:"The Camping Trip",text:"Last summer, Jack went camping with his family. They drove to a forest. Jack helped put up the tent. At night, they made a fire. Jack roasted a marshmallow. It was yummy. Then Jack heard a strange noise. What was that? he asked. His dad shined a flashlight into the dark. Two big eyes looked back! It was a deer. The deer walked away slowly. Jack was so excited. He will always remember that night.",translation:"杰克在露营时遇到了鹿，那是一个难忘的夜晚。",
+questions:[{q:"Where did Jack and his family go?",options:["To the beach","To a forest","To a city","To a farm"],answer:1},{q:"What did Jack hear at night?",options:["Music","A strange noise","Rain","A phone"],answer:1},{q:"What was the noise?",options:["A bear","A wolf","A deer","A bird"],answer:2}]},
+// === Lv.2 - The New Student (NEW) ===
+{title:"The New Student",text:"A new boy named Chen joined the class. He came from another country. He spoke English slowly. Some kids laughed. Lily felt bad for him. At lunch, she sat next to Chen. She asked: Do you want to play? Chen smiled and nodded. They played soccer together. Chen was very good at soccer! After that, more kids wanted to play with Chen. Lily learned that being kind is more important than being good at English.",translation:"新同学陈不太会说英语，但莉莉主动和他玩，发现他足球踢得很好。",
+questions:[{q:"Why did Chen speak slowly?",options:["He was shy","He was new to English","He was tired","He was sick"],answer:1},{q:"What did Lily do?",options:["She laughed","She sat with him","She ignored him","She told the teacher"],answer:1},{q:"What did Lily learn?",options:["Soccer is fun","New kids are shy","Kindness is important","English is hard"],answer:2}]},
+// === Lv.2 - The Magic Paintbrush (NEW) ===
+{title:"The Magic Paintbrush",text:"Mia found an old paintbrush in her grandmother's attic. When she painted with it, something magical happened. She painted a blue butterfly. The butterfly flew off the paper! Mia was amazed. She painted a tree. A tiny tree grew on her desk. But the magic only lasted one hour. Then everything turned back to paper. Mia decided to use the brush to paint one special picture every day. She made beautiful art and learned that real magic comes from practice.",translation:"米娅发现了一支神奇的画笔，画的东西会活过来，但她明白了真正的魔法来自勤奋练习。",
+questions:[{q:"Where did Mia find the brush?",options:["At a store","In the attic","At school","In the garden"],answer:1},{q:"What happened when she painted?",options:["Nothing","The painting came alive","The brush broke","She got scared"],answer:1},{q:"What did Mia learn?",options:["Magic is real","Practice makes art","Brushes are special","Butterflies are magic"],answer:1}]},
+// === Lv.3 - The Mountain Challenge (NEW) ===
+{title:"The Mountain Challenge",text:"Every year, the village children climbed Sunrise Mountain. It was a tradition. Sofia was ten now. She could join for the first time. The mountain looked very tall. They started early in the morning. The path was steep. Sofia's legs hurt. Her feet were tired. She wanted to turn back. Her older brother said: Look up. The sun was rising over the peak. It was beautiful. Sofia kept walking. Step by step. When she reached the top, she felt like she could do anything. The whole valley was below her.",translation:"索菲亚第一次爬日出山，虽然很累但坚持到了山顶，看到了最美的风景。",
+questions:[{q:"Why was this year special?",options:["It was Sofia's birthday","Sofia could join the climb","The mountain was new","Sofia won a prize"],answer:1},{q:"What helped Sofia keep going?",options:["Her mom called","The sunrise was beautiful","She found a short cut","She wanted water"],answer:1},{q:"How did Sofia feel at the top?",options:["Angry","Tired only","Like she could do anything","Scared of heights"],answer:2}]},
+// === Lv.3 - The Time Capsule (NEW) ===
+{title:"The Time Capsule",text:"On the last day of school, Mrs. Green gave each student a small box. She said: Write a letter to your future self. Think about who you want to become. Alex wrote about his dream to become a scientist. He put a photo of himself and a small toy rocket in the box. Mrs. Green collected all the boxes. We will open them in ten years, she said. Alex wondered: Will I become the person I wrote about? He decided to work hard every day so that his future self would be proud.",translation:"亚历克斯给未来的自己写了一封信，并决定每天努力成为想成为的人。",
+questions:[{q:"What did Mrs. Green give the students?",options:["A book","A small box","A letter","A toy"],answer:1},{q:"What did Alex put in his box?",options:["A toy rocket and a photo","A medal","A candy","A letter only"],answer:0},{q:"When will they open the boxes?",options:["Next year","In five years","In ten years","Tomorrow"],answer:2}]},
+// === Lv.3 - The Helping Hand (NEW) ===
+{title:"The Helping Hand",text:"There was an old man who lived next door to Anna. His name was Mr. Garcia. He walked with a stick and moved very slowly. One winter morning, it snowed heavily. Anna saw Mr. Garcia trying to clear the snow from his path. He looked tired. Anna put on her coat and went outside. She said: Can I help you, Mr. Garcia? His eyes lit up. They worked together. Anna shoveled while Mr. Garcia rested. After that, Anna helped him every week. Sometimes she read him stories. Sometimes she brought him cookies. She learned that a small act of kindness can make a big difference in someone's life.",translation:"安娜帮助了行动不便的邻居加西亚先生清理积雪，后来每周都去看望他。",
+questions:[{q:"Why did Mr. Garcia move slowly?",options:["He was old","He was tired","He was sick","It was cold"],answer:0},{q:"What did Anna do when she saw Mr. Garcia?",options:["Called her mom","Went to help him","Ignored him","Took a photo"],answer:1},{q:"What did Anna learn?",options:["Snow is heavy","Old people need help","Small kindness matters","Winter is cold"],answer:2}]},
+// === Lv.3 - The Star Gazer (NEW) ===
+{title:"The Star Gazer",text:"Ben loved looking at the stars. Every clear night, he went to his backyard with a small telescope. He knew all the constellation names. Orion. Ursa Major. Cassiopeia. His friends thought it was strange. Why do you look at dots in the sky? they asked. Ben could not explain it. The stars made him feel small but also part of something big. One night, his dad brought him to an observatory. Ben saw Saturn through a real telescope. He saw its rings. He cried happy tears. He knew then that he wanted to study space when he grew up. His dream was written in the stars.",translation:"本喜欢看星星，通过望远镜看到了土星环，决定长大后研究太空。",
+questions:[{q:"What did Ben do every clear night?",options:["Read books","Look at stars","Play games","Draw pictures"],answer:1},{q:"How did his friends feel about his hobby?",options:["They liked it","They thought it was strange","They joined him","They laughed at him"],answer:1},{q:"What did Ben see at the observatory?",options:["The moon","Saturn's rings","A shooting star","Mars"],answer:1}]},
+// === Lv.3 - The Kindness Challenge (NEW) ===
+{title:"The Kindness Challenge",text:"Sophia's teacher gave the class a challenge. Do one kind thing every day for a week and write about it. Sophia thought it would be easy. Day one: she shared her snack with a friend who forgot lunch. Day two: she helped her little brother with homework. Day three: she gave a compliment to someone who looked sad. By day four, Sophia noticed something. She felt happier. People smiled at her more. Her friends wanted to sit with her at lunch. On the last day, she wrote in her notebook: Being kind does not cost anything, but it gives you everything. The teacher read it aloud. The whole class clapped.",translation:"索菲亚做了一个星期的善行挑战，发现善良不需要花钱，却能带来一切。",
+questions:[{q:"What was the challenge?",options:["Read a book","Do kind things","Run a race","Write a story"],answer:1},{q:"How did Sophia feel after the challenge?",options:["Tired","Happier","Bored","The same"],answer:1},{q:"What did Sophia learn?",options:["Kindness costs money","Being kind makes you happy","Friends are important","Homework is easy"],answer:1}]}
+];
+
+// ============ BOSS BATTLE ============
+function bossSelect() {
+  state.combo = 0; state.curBoss = 0;
+  var B = [
+    {id:"animals",n:"[Beast King]",e:"AN",tp:"animals",hp:5},
+    {id:"food",n:"[Food Demon]",e:"FD",tp:"food",hp:5},
+    {id:"school",n:"[Principal Fiend]",e:"PF",tp:"school",hp:5},
+    {id:"nature",n:"[Nature Giant]",e:"NG",tp:"nature",hp:5},
+    {id:"daily",n:"[Daily Assassin]",e:"DA",tp:"daily",hp:5},
+    {id:"emotions",n:"[Emotion Mage]",e:"EM",tp:"emotions",hp:5},
+    {id:"final",n:"[Dark Overlord]",e:"DO",tp:"final",hp:10,f:true}
+  ];
+  var fu = B.slice(0,6).every(function(b) { return state.bossDone.indexOf(b.id) >= 0; });
+  var allDone = fu && state.bossDone.indexOf("final") >= 0;
+  var h = '<div class="mg">';
+  for (var i = 0; i < B.length; i++) {
+    var b = B[i];
+    var cl = state.bossDone.indexOf(b.id) >= 0;
+    var ul = i === 0 || state.bossDone.indexOf(B[i-1].id) >= 0 || (b.f && fu);
+    h += '<div class="bc' + (cl ? '' : '') + '" onclick="' + (ul ? 'startBoss(' + i + ')' : '') + '"><div class="be">' + b.e + '</div><div class="bi"><h3>' + b.n + '</h3><p>' + (b.f ? 'All words!' : b.tp) + '</p></div><div class="bb ' + (cl ? 'c' : (ul ? 'g' : 'l')) + '\">' + (cl ? 'CLEAR' : (ul ? 'FIGHT' : 'LOCKED')) + '</div></div>';
+  }
+  h += '</div>';
+  h += '<div style="display:flex;gap:8px;margin-top:8px">';
+  h += '<div class="mb" onclick="endlessMode()" style="flex:1;justify-content:center;border-color:var(--tl);padding:14px"><span>♾️ INFINITE</span><span style="font-size:11px;color:rgba(255,255,255,0.4);margin-left:6px">Unlimited Practice</span></div>';
+  h += '<div class="mb" onclick="resetBoss()" style="flex:0;padding:14px;border-color:rgba(255,255,255,0.15)">🔄 RESET</div>';
+  h += '</div>';
+  if (allDone) {
+    h += '<div style="margin-top:10px;padding:12px;border-radius:12px;background:rgba(255,215,0,0.1);border:1px solid var(--gd);font-size:13px">🏆 ALL BOSSES DEFEATED! You are truly the Stand Master!</div>';
+  }
+  document.getElementById("wC").innerHTML = h;
+}
+
+const BOSSES = [
+{id:"animals",n:"[Beast King]",tp:"animals",hp:5},
+{id:"food",n:"[Food Demon]",tp:"food",hp:5},
+{id:"school",n:"[Principal Fiend]",tp:"school",hp:5},
+{id:"nature",n:"[Nature Giant]",tp:"nature",hp:5},
+{id:"daily",n:"[Daily Assassin]",tp:"daily",hp:5},
+{id:"emotions",n:"[Emotion Mage]",tp:"emotions",hp:5},
+{id:"final",n:"[Dark Overlord]",tp:"final",hp:10,f:true}
+];
+
+var bossLock = false;
+var endlessLock = false;
+
+function startBoss(idx) {
+  var b = BOSSES[idx];
+  state.curBoss = idx;
+  state.bossLives = 3;
+  state.bossHP = b.hp;
+  state.combo = 0;
+  bossLock = false;
+  bossRender();
+}
+
+function bossRender() {
+  document.getElementById("wC").innerHTML = "<div style='padding:20px'>...</div>";
+  var b = BOSSES[state.curBoss];
+  bossLock = false;
+  var word;
+  if (b.f) {
+    var av = WORDS.filter(function(w) { return state.bossDone.indexOf(w.tp) < 0; });
+    if (av.length === 0) { bossWin(); return; }
+    word = av[Math.floor(Math.random() * av.length)];
+  } else {
+    var pool = WORDS.filter(function(w) { return w.tp === b.tp; });
+    word = pool[Math.floor(Math.random() * pool.length)];
+  }
+  var pool2 = WORDS.filter(function(w) { return w.en !== word.en; });
+  pool2.sort(function() { return 0.5 - Math.random(); });
+  var dists = pool2.slice(0, 3);
+  var opts, correct, display;
+  var qtype = Math.random() > 0.5 ? "en2zh" : "zh2en";
+  if (qtype === "en2zh") {
+    display = word.en + "  (" + word.ph + ")";
+    opts = [word.zh, dists[0].zh, dists[1].zh, dists[2].zh];
+  } else {
+    display = word.zh;
+    opts = [word.en, dists[0].en, dists[1].en, dists[2].en];
+  }
+  opts.sort(function() { return 0.5 - Math.random(); });
+  correct = opts.indexOf(qtype === "en2zh" ? word.zh : word.en);
+
+  var h = '<div class="back" onclick="bossSelect()">◀ Back</div>';
+  h += '<div class="bh"><div><div class="bnm">' + b.n + '</div></div>';
+  h += '<div style="flex:1"><div class="bho"><div class="bhi" id="bhp" style="width:' + ((state.bossHP / b.hp) * 100) + '%"></div></div>';
+  h += '<div class="bht">HP: ' + state.bossHP + '/' + b.hp + '</div></div>';
+  h += '<div class="pl" id="lives">';
+  for (var li = 0; li < 3; li++) h += '<span class="' + (li >= state.bossLives ? 'ht-l' : '') + '">❤️</span>';
+  h += '</div></div>';
+  h += '<div class="pr">' + state.combo + ' COMBO</div>';
+  h += '<div class="wc"><div class="wd">' + display + '</div></div>';
+  h += '<div class="og" id="bOpts">';
+  for (var oi = 0; oi < opts.length; oi++) {
+    h += '<button class="ob" onclick="checkBoss(this,' + oi + ',' + correct + ')">' + opts[oi] + '</button>';
+  }
+  h += '</div><div class="cd" id="cdEndless"></div>';
+  document.getElementById("wC").innerHTML = h;
+}
+
+function checkBoss(el, idx, correct) {
+  if (bossLock) return;
+  bossLock = true;
+  var btns = document.querySelectorAll("#bOpts .ob");
+  for (var i = 0; i < btns.length; i++) btns[i].disabled = true;
+  if (idx === correct) {
+    el.classList.add("cr");
+    state.bossHP--; state.combo++;
+    SOUND.correct();
+    if (state.combo >= 3) { SOUND.combo(state.combo); ora(); }
+    var b = BOSSES[state.curBoss];
+    var f = document.getElementById("bhp");
+    if (f) f.style.width = ((state.bossHP / b.hp) * 100) + "%";
+    var bonus = state.combo >= 3 ? Math.floor(state.combo / 3) : 0;
+    addStars(1 + bonus);
+    document.getElementById("cdBoss").innerHTML = "<span style='color:var(--tl)'>HIT! +" + (1+bonus) + " stars</span>";
+    if (state.bossHP <= 0) { setTimeout(bossWin, 600); }
+    else { setTimeout(function() { bossLock = false; bossRender(); }, 800); }
+  } else {
+    el.classList.add("wr");
+    btns[correct].classList.add("cr");
+    state.bossLives--; state.combo = 0;
+    SOUND.wrong();
+    document.getElementById("cdBoss").innerHTML = "<span style='color:var(--rd)'>BOSS attacks! Lost a life</span>";
+    var l = document.getElementById("lives");
+    if (l) {
+      var lh = "";
+      for (var i = 0; i < 3; i++) lh += "<span class='" + (i >= state.bossLives ? "ht-l" : "") + "'>❤️</span>";
+      l.innerHTML = lh;
+    }
+    if (state.bossLives <= 0) { setTimeout(bossLose, 800); }
+    else { setTimeout(function() { bossLock = false; bossRender(); }, 1200); }
+  }
+}
+
+function bossWin() {
+  var b = BOSSES[state.curBoss];
+  if (state.bossDone.indexOf(b.id) === -1) { state.bossDone.push(b.id); save(); }
+  SOUND.bossDefeat();
+  addStars(b.f ? 35 : 5);
+  document.getElementById("wC").innerHTML = "<div class='rc'><div style='font-size:36px;font-weight:900;color:var(--gd)'>VICTORY!</div><div style='color:rgba(255,255,255,0.6);margin:6px 0'>" + b.n + " defeated!</div><div style='margin-top:12px'><button class='sk' onclick='bossSelect()'>Continue</button></div></div>";
+  if (b.f) {
+    var d = document.createElement("div");
+    d.className = "sro";
+    d.innerHTML = "<div style='font-size:32px;font-weight:900'>ALL CLEAR!</div><div style='font-size:24px;margin:12px;color:var(--gd)'>+35 Bonus Stars!</div><button class='bo' onclick='this.parentElement.remove()'>OK</button>";
+    document.body.appendChild(d);
+  }
+}
+
+function bossLose() {
+  document.getElementById("wC").innerHTML = "<div class='rc'><div style='font-size:48px'>💀</div><div style='font-size:18px;font-weight:700;margin:8px 0'>You were defeated!</div><div style='color:rgba(255,255,255,0.5);margin-bottom:12px'>But a Stand never gives up!</div><button class='sk' onclick='startBoss(" + state.curBoss + ")'>Retry</button><button class='sk' onclick='bossSelect()' style='margin-left:8px'>Back</button></div>";
+}
+
+function resetBoss() {
+  if (confirm("Reset all bosses?")) {
+    state.bossDone = []; save(); bossSelect();
+  }
+}
+
+// ============ ENDLESS MODE ============
+function endlessMode() {
+  state.combo = 0; endlessLock = false; endlessQ();
+}
+
+function endlessQ() {
+  endlessLock = false;
+  var qtype = Math.random() > 0.5 ? "en2zh" : "zh2en";
+  var word = WORDS[Math.floor(Math.random() * WORDS.length)];
+  var pool = WORDS.filter(function(w) { return w.en !== word.en; });
+  pool.sort(function() { return 0.5 - Math.random(); });
+  var dists = pool.slice(0, 3);
+  var opts, correct, display;
+  if (qtype === "en2zh") {
+    display = word.en + "  (" + word.ph + ")";
+    opts = [word.zh, dists[0].zh, dists[1].zh, dists[2].zh];
+  } else {
+    display = word.zh;
+    opts = [word.en, dists[0].en, dists[1].en, dists[2].en];
+  }
+  opts.sort(function() { return 0.5 - Math.random(); });
+  correct = opts.indexOf(qtype === "en2zh" ? word.zh : word.en);
+  var h = '<div class="back" onclick="bossSelect()">◀ Back</div>';
+  h += '<div class="pr">♾️ INFINITE • ' + state.combo + ' COMBO • ⭐ ' + state.stars + '</div>';
+  h += '<div class="wc"><div class="wd">' + display + '</div></div>';
+  h += '<div class="og" id="eOpts">';
+  for (var oi = 0; oi < opts.length; oi++) {
+    h += '<button class="ob" onclick="checkEndless(this,' + oi + ',' + correct + ')">' + opts[oi] + '</button>';
+  }
+  h += '</div><div class="cd" id="cdEndless"></div>';
+  document.getElementById("wC").innerHTML = h;
+}
+
+function checkEndless(el, idx, correct) {
+  if (endlessLock) return;
+  endlessLock = true;
+  var btns = document.querySelectorAll("#eOpts .ob");
+  for (var i = 0; i < btns.length; i++) btns[i].disabled = true;
+  if (idx === correct) {
+    el.classList.add("cr"); state.combo++;
+    SOUND.correct();
+    if (state.combo >= 3) { SOUND.combo(state.combo); ora(); menacing(); }
+    var bonus = state.combo >= 3 ? Math.floor(state.combo / 3) : 0;
+    addStars(1 + bonus);
+    document.getElementById("cdEndless").innerHTML = "<span style='color:var(--tl)">Correct! +" + (1+bonus) + " stars</span>";
+    setTimeout(function() { endlessQ(); }, 600);
+  } else {
+    el.classList.add("wr");
+    btns[correct].classList.add("cr");
+    state.combo = 0;
+    SOUND.wrong();
+    document.getElementById("cdEndless").innerHTML = "<span style='color:var(--rd)">Not quite!</span>";
+    setTimeout(function() { endlessQ(); }, 1200);
+  }
+}
+
+// ============ READING ============
+function startRead() {
+  state.ri = 0; state.rs = 0; state.ra = {};
+  showRead();
+}
+
+function showRead() {
+  if (state.ri >= READINGS.length) {
+    var bonus = Math.floor(state.rs / 3);
+    if (bonus > 0) addStars(bonus);
+    document.getElementById("rC").innerHTML = "<div class='rc'><div style='font-size:36px;font-weight:900;color:var(--gd)'>ALL CLEAR!</div><div style='color:rgba(255,255,255,0.5);margin:6px 0'>Reading Trial complete</div><div style='color:var(--tl)'>+ " + bonus + " stars</div></div>";
+    return;
+  }
+  var r = READINGS[state.ri];
+  state.ra = {};
+  var h = '<div class="pr">📖 Story ' + (state.ri + 1) + '/' + READINGS.length + '</div>';
+  h += '<div class="rb"><div style="font-weight:700;color:var(--gd);margin-bottom:8px">' + r.title + '</div><div>' + r.text + '</div>';
+  h += '<div class="trans-btn" onclick="var t=this.nextElementSibling;t.style.display=t.style.display===\'block\'?\'none\':\'block\'">🌐 Translation</div>';
+  h += '<div class="translation">' + r.translation + '</div></div>';
+  r.questions.forEach(function(q, qi) {
+    h += '<div class="qi" id="rq' + qi + '"><div class="question-text">' + (qi + 1) + ". " + q.q + '</div>';
+    q.options.forEach(function(o, oi) {
+      h += '<button class="qo" onclick="checkRead(this,' + qi + ',' + oi + ',' + q.answer + ')">' + o + '</button>';
+    });
+    h += '</div>';
+  });
+  document.getElementById("rC").innerHTML = h;
+}
+
+function checkRead(el, qi, oi, ai) {
+  if (state.ra[qi]) return;
+  state.ra[qi] = true;
+  var btns = document.querySelectorAll("#rq" + qi + " .qo");
+  for (var i = 0; i < btns.length; i++) btns[i].disabled = true;
+  if (oi === ai) {
+    el.classList.add("cr");
+    state.rs++;
+    SOUND.correct();
+  } else {
+    el.classList.add("wr");
+    btns[ai].classList.add("cr");
+    SOUND.wrong();
+  }
+  if (Object.keys(state.ra).length >= READINGS[state.ri].questions.length) {
+    setTimeout(function() { state.ri++; showRead(); }, 1500);
+  }
+}
+
+// ============ CONVERSATIONS ============
+// Lv.1 Basic (3 scenes): Simple fixed phrases, restaurant/shopping/friend
+// Lv.2 Intermediate (3 scenes): Open conversations, library/directions/zoo
+// Lv.3 Advanced (2 scenes): Complex expressions, hospital/party
+var CONVS = [
+// === Lv.1 - Restaurant (keep existing) ===
+{id:"restaurant",n:"Restaurant",desc:"Ordering food",npc:"Sarah",
+scenes:[
+{npc:"Good evening! Welcome. What would you like to eat?",cn:"What would you like?",opts:[{t:"I would like a cheeseburger please.",s:2,f:"Perfect!"},{t:"A hamburger.",s:1,f:"Try a full sentence."}]},
+{npc:"Great choice! What about drinks?",cn:"What to drink?",opts:[{t:"Orange juice please.",s:2,f:"Excellent!"},{t:"Juice.",s:1,f:"Add please."}]},
+{npc:"Here is your food. Enjoy!",cn:"Enjoy your meal.",opts:[{t:"Thank you! It looks great.",s:2,f:"Very polite!"},{t:"Thanks.",s:1,f:"Try to say more."}]},
+{npc:"How was everything? Ready to pay?",cn:"Ready to pay?",opts:[{t:"It was good! Can I have the bill?",s:2,f:"Perfect!"},{t:"Yes.",s:1,f:"Say more."}]}
+]},
+// === Lv.1 - Shopping (keep existing) ===
+{id:"shopping",n:"Shopping",desc:"Buying clothes",npc:"Mike",
+scenes:[
+{npc:"Welcome! Can I help you?",cn:"Can I help?",opts:[{t:"I am looking for a T-shirt.",s:2,f:"Clear!"},{t:"A T-shirt.",s:1,f:"Full sentence."}]},
+{npc:"This blue one is popular. Like it?",cn:"Like this one?",opts:[{t:"It looks nice! Can I try it on?",s:2,f:"Great!"},{t:"No.",s:1,f:"Be more specific."}]},
+{npc:"The fitting room is over there.",cn:"Fitting room there.",opts:[{t:"Thank you! I will be back.",s:2,f:"Perfect!"},{t:"OK.",s:1,f:"Say more."}]},
+{npc:"How does it fit? Want to buy it?",cn:"Buy it?",opts:[{t:"It fits perfectly! I will take it.",s:2,f:"Excellent!"},{t:"Yes.",s:1,f:"Add detail."}]}
+]},
+// === Lv.1 - New Friend (keep existing) ===
+{id:"friend",n:"New Friend",desc:"Meeting someone new",npc:"Tom",
+scenes:[
+{npc:"Hi! I am Tom. What is your name?",cn:"What's your name?",opts:[{t:"Hi Tom! Nice to meet you!",s:2,f:"Great start!"},{t:"My name is...",s:1,f:"Say nice to meet you."}]},
+{npc:"Nice to meet you! How old are you?",cn:"How old?",opts:[{t:"I am 11. How about you?",s:2,f:"Perfect!"},{t:"I am 11.",s:1,f:"Ask back!"}]},
+{npc:"I am 12. What do you like to do?",cn:"Your hobbies?",opts:[{t:"I like basketball and reading.",s:2,f:"Great details!"},{t:"Games.",s:1,f:"Full sentence."}]},
+{npc:"Cool! Let's play together!",cn:"Let's play!",opts:[{t:"Sure! Sounds fun!",s:2,f:"Friend made!"},{t:"OK.",s:1,f:"Show excitement!"}]}
+]},
+// === Lv.2 - Library (NEW) ===
+{id:"library",n:"Library",desc:"At the school library",npc:"Librarian",
+scenes:[
+{npc:"Hello! Welcome to the library. Can I help you find something?",cn:"Can I help?",opts:[{t:"Yes, I am looking for a book about space.",s:2,f:"Great question!"},{t:"A book.",s:1,f:"Be more specific."}]},
+{npc:"We have many space books. This one is very popular.",cn:"This one is popular.",opts:[{t:"That looks interesting! Can I borrow it?",s:2,f:"Excellent!"},{t:"Give me.",s:1,f:"Say can I borrow."}]},
+{npc:"Sure. Do you have a library card?",cn:"Do you have a card?",opts:[{t:"Yes, here is my card.",s:2,f:"Perfect!"},{t:"No.",s:1,f:"Say 'here is my card'."}]},
+{npc:"Great! You can keep it for three weeks. Enjoy reading!",cn:"Three weeks, enjoy!",opts:[{t:"Thank you! I will take good care of it.",s:2,f:"Very polite!"},{t:"OK.",s:1,f:"Say thank you."}]}
+]},
+// === Lv.2 - Asking Directions (NEW) ===
+{id:"directions",n:"Directions",desc:"Asking for directions",npc:"Officer",
+scenes:[
+{npc:"Hello there! You look lost. Can I help you?",cn:"Can I help?",opts:[{t:"Yes please! I am looking for the museum.",s:2,f:"Clear!"},{t:"Museum.",s:1,f:"Say 'I am looking for'."}]},
+{npc:"The museum is on Park Street. Go straight for two blocks.",cn:"Go straight two blocks.",opts:[{t:"Go straight for two blocks. Then what?",s:2,f:"Good question!"},{t:"OK.",s:1,f:"Ask 'then what'."}]},
+{npc:"Then turn left. You will see a big red building. That is the museum.",cn:"Turn left, red building.",opts:[{t:"Thank you! I think I can find it now.",s:2,f:"Perfect!"},{t:"Left.",s:1,f:"Say a full sentence."}]},
+{npc:"You are welcome! Have a nice day at the museum!",cn:"Have a nice day!",opts:[{t:"Thank you! You too! Goodbye!",s:2,f:"Excellent!"},{t:"Bye.",s:1,f:"Say 'thank you' and 'goodbye'."}]}
+]},
+// === Lv.2 - At the Zoo (NEW) ===
+{id:"zoo",n:"At the Zoo",desc:"Visiting the zoo with family",npc:"Mom",
+scenes:[
+{npc:"Here we are! What animal do you want to see first?",cn:"Which animal first?",opts:[{t:"I want to see the elephants! They are my favorite.",s:2,f:"Great choice!"},{t:"Elephants.",s:1,f:"Say a full sentence."}]},
+{npc:"The elephants are near the lake. Let us go this way.",cn:"This way to elephants.",opts:[{t:"Look! The baby elephant is playing in the water!",s:2,f:"Exciting!"},{t:"I see it.",s:1,f:"Add more detail."}]},
+{npc:"That is so cute! Do you want to see the pandas too?",cn:"See pandas too?",opts:[{t:"Yes please! I heard pandas eat bamboo all day.",s:2,f:"Good knowledge!"},{t:"Yes.",s:1,f:"Say 'yes please'."}]},
+{npc:"They do! Let us hurry before it gets too late.",cn:"Let us hurry.",opts:[{t:"Okay! This is the best day ever! Thank you, Mom!",s:2,f:"Sweet!"},{t:"Okay.",s:1,f:"Say thank you."}]}
+]},
+// === Lv.3 - Seeing a Doctor (NEW) ===
+{id:"doctor",n:"Doctor Visit",desc:"Going to the hospital",npc:"Dr. Lee",
+scenes:[
+{npc:"Hello, what seems to be the problem?",cn:"What is wrong?",opts:[{t:"I have a headache and my throat hurts.",s:2,f:"Clear description!"},{t:"I am sick.",s:1,f:"Describe your symptoms."}]},
+{npc:"Let me check your temperature. Open your mouth and say Ah.",cn:"Open your mouth.",opts:[{t:"Ahhh. Is it serious, Doctor?",s:2,f:"Good question!"},{t:"Ahhh.",s:1,f:"Ask 'is it serious'."}]},
+{npc:"Do not worry. Just a cold. You need to rest and drink lots of water.",cn:"Just a cold, rest and water.",opts:[{t:"Okay, I will rest. How many days should I stay home?",s:2,f:"Great follow-up!"},{t:"Okay.",s:1,f:"Ask how many days."}]},
+{npc:"Two or three days. Here is a note for your teacher. Get well soon!",cn:"Two days rest, here is a note.",opts:[{t:"Thank you, Dr. Lee. I hope I feel better soon.",s:2,f:"Very polite!"},{t:"Thanks.",s:1,f:"Say 'thank you' and 'feel better'."}]}
+]},
+// === Lv.3 - Birthday Party (NEW) ===
+{id:"birthday",n:"Birthday Party",desc:"Attending a friend's party",npc:"Amy",
+scenes:[
+{npc:"Happy Birthday! I am so glad you came!",cn:"Happy birthday, glad you came!",opts:[{t:"Happy Birthday, Amy! I brought you a present.",s:2,f:"Perfect!"},{t:"Here.",s:1,f:"Say 'Happy Birthday' and 'present'."}]},
+{npc:"Oh, you did not have to! Can I open it now?",cn:"Can I open it?",opts:[{t:"Of course! I hope you like it.",s:2,f:"Very kind!"},{t:"Yes.",s:1,f:"Say 'of course'."}]},
+{npc:"Wow! A beautiful notebook! I love it! Thank you so much!",cn:"She loves it!",opts:[{t:"I am so happy you like it! I know you love writing.",s:2,f:"So thoughtful!"},{t:"Good.",s:1,f:"Say 'I am happy you like it'."}]},
+{npc:"Come on! Let us get some cake and play some games!",cn:"Time for cake and games!",opts:[{t:"Yay! I love cake! Let us go!",s:2,f:"Enthusiastic!"},{t:"OK.",s:1,f:"Show some excitement!"}]}
+]}
+];
+
+function startConv() {
+  state.convIdx = 0; state.convSc = 0; state.convSt = 0; state.convLock = false;
+  convList();
+}
+
+function convList() {
+  var h = '<div class="mg">';
+  CONVS.forEach(function(c, i) {
+    var done = state.convDone.indexOf(c.id) >= 0;
+    h += '<div class="bc" onclick="startConvOne(' + i + ')"><div class="be">💬</div><div class="bi"><h3>' + c.n + '</h3><p>' + c.desc + '</p></div><div class="bb ' + (done ? 'c' : 'g') + '\">' + (done ? 'DONE' : 'START') + '</div></div>';
+  });
+  h += '</div>';
+  document.getElementById("sC").innerHTML = h;
+}
+
+function startConvOne(idx) {
+  state.convIdx = idx; state.convSc = 0; state.convSt = 0; state.convLock = false;
+  convScene();
+}
+
+function convScene() {
+  var c = CONVS[state.convIdx];
+  if (state.convSc >= c.scenes.length) {
+    var isNew = state.convDone.indexOf(c.id) < 0;
+    if (isNew) {
+      state.convDone.push(c.id);
+      state.convSt = Math.min(state.convSt, 8);
+      var bonus = Math.floor(state.convSt / 4);
+      if (bonus > 0) addStars(bonus);
+    }
+    save();
+    var displayed = isNew ? (Math.floor(Math.min(state.convSt, 8) / 4)) : 0;
+    document.getElementById("sC").innerHTML = "<div class='rc'><div style='font-size:36px;font-weight:900;color:var(--gd)'>FRIEND MADE!</div><div style='color:var(--tl)'>+ " + displayed + " stars</div><div style='color:rgba(255,255,255,0.5);margin:6px 0'>" + c.n + (isNew ? " completed!" : " (replay)") + "</div><div style='margin-top:12px'><button class='sk' onclick='startConvOne(" + state.convIdx + ")'>Again</button><button class='sk' onclick='convList()' style='margin-left:8px'>Back</button></div></div>";
+    return;
+  }
+  var sc = c.scenes[state.convSc];
+  var h = '<div class="cb"><div class="cbp"><div class="cbn">👤 [' + c.npc + ']</div><div class="cbb">' + sc.npc + '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px">' + sc.cn + '</div></div></div>';
+  h += '<div id="cOpts">';
+  var letters = ["A","B"];
+  sc.opts.forEach(function(o, oi) {
+    h += '<div class="cho" id="co' + oi + '" onclick="pickResp(' + oi + ')"><span class="cho-l" style="width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.1);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">' + letters[oi] + '</span><span>' + o.t + '</span></div>';
+  });
+  h += '</div><div class="cf" id="cf"></div></div>';
+  document.getElementById("sC").innerHTML = h;
+  // TTS
+  setTimeout(function() {
+    if (window.speechSynthesis) {
+      var u = new SpeechSynthesisUtterance(sc.npc);
+      u.lang = "en-US"; u.rate = 0.8;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    }
+  }, 300);
+}
+
+function pickResp(oi) {
+  if (state.convLock) return;
+  state.convLock = true;
+  var c = CONVS[state.convIdx];
+  var sc = c.scenes[state.convSc];
+  var o = sc.opts[oi];
+  state.convSt += o.s;
+  SOUND.correct();
+  document.getElementById("cf").innerHTML = "💬 " + o.f;
+  var btns = document.querySelectorAll("#cOpts .cho");
+  for (var i = 0; i < btns.length; i++) { btns[i].style.pointerEvents = "none"; btns[i].style.opacity = "0.6"; }
+  var sel = document.getElementById("co" + oi);
+  if (sel) sel.className = "cho s";
+  setTimeout(function() {
+    state.convSc++;
+    state.convLock = false;
+    convScene();
+  }, 1500);
+}
+
+// ============ DAILY CHALLENGE ============
+function checkDailyReset() {
+  var todayStr = today();
+  if (state.dailyDate !== todayStr) {
+    if (state.dailyDate !== '') {
+      var lastDate = new Date(state.dailyDate);
+      var now = new Date(todayStr);
+      var diffDays = Math.floor((now - lastDate) / (1000 * 60 * 60 * 24));
+      if (diffDays > 1) {
+        state.dailyStreak = 0;
+      }
+    }
+    state.dailyDone = '';
+    state.dailyIdx = 0;
+    state.dailyStars = 0;
+    save();
+  }
+}
+
+function updateDailyDisplay() {
+  var todayStr = today();
+  var done = state.dailyDone === todayStr;
+  var card = document.getElementById('dcCard');
+  var badge = document.getElementById('dcBadge');
+  var streak = document.getElementById('dcStreak');
+
+  if (streak) streak.textContent = '🔥 ' + state.dailyStreak + ' days streak';
+
+  if (badge) {
+    if (done) {
+      badge.textContent = '✅ DONE';
+      badge.style.background = 'var(--tl)';
+    } else {
+      badge.textContent = 'START';
+      badge.style.background = 'var(--gd)';
+    }
+  }
+
+  if (card) {
+    card.style.borderColor = done ? 'var(--tl)' : 'rgba(255,215,0,0.25)';
+  }
+}
+
+function startDaily() {
+  checkDailyReset();
+  SOUND.click();
+  var todayStr = today();
+  if (state.dailyDone === todayStr) {
+    // Already done today, show summary
+    sm('d');
+    renderDailyDone();
+    return;
+  }
+  sm('d');
+  state.dailyIdx = 0;
+  state.dailyStars = 0;
+  renderDailyQ();
+}
+
+function renderDaily() {
+  var todayStr = today();
+  if (state.dailyDone === todayStr) {
+    renderDailyDone();
+  } else {
+    state.dailyIdx = 0;
+    state.dailyStars = 0;
+    state.dailyAnswers = [];
+    renderDailyQ();
+  }
+}
+
+function renderDailyQ() {
+  if (state.dailyIdx >= 5) {
+    // Daily done!
+    var todayStr = today();
+    state.dailyDone = todayStr;
+    state.dailyDate = todayStr;
+    state.dailyStreak++;
+    save();
+    ui();
+    renderDailyDone();
+    return;
+  }
+
+  // Pick random question
+  var word = WORDS[Math.floor(Math.random() * WORDS.length)];
+  var qtype = Math.random() > 0.5 ? "en2zh" : "zh2en";
+  var pool = WORDS.filter(function(w) { return w.en !== word.en; });
+  pool.sort(function() { return 0.5 - Math.random(); });
+  var dists = pool.slice(0, 3);
+  var opts, correct, display;
+  if (qtype === "en2zh") {
+    display = word.en + "  (" + word.ph + ")";
+    opts = [word.zh, dists[0].zh, dists[1].zh, dists[2].zh];
+  } else {
+    display = word.zh;
+    opts = [word.en, dists[0].en, dists[1].en, dists[2].en];
+  }
+  opts.sort(function() { return 0.5 - Math.random(); });
+  correct = opts.indexOf(qtype === "en2zh" ? word.zh : word.en);
+
+  var h = '<div class="back" onclick="sm(\'m\')">◀ Back</div>';
+
+  // Streak bar
+  h += '<div class="dq-streak-bar">';
+  var maxDots = Math.min(state.dailyStreak, 14);
+  var fireLevel = 0;
+  if (state.dailyStreak >= 14) fireLevel = 4;
+  else if (state.dailyStreak >= 7) fireLevel = 3;
+  else if (state.dailyStreak >= 3) fireLevel = 2;
+  else if (state.dailyStreak >= 1) fireLevel = 1;
+
+  for (var s = 0; s < Math.max(5, maxDots); s++) {
+    var cls = 'dq-streak-dot';
+    if (s < state.dailyStreak) cls += ' active';
+    if (s >= state.dailyStreak - 1 && s < state.dailyStreak && state.dailyStreak > 0) cls += ' fire';
+    h += '<span class="' + cls + '">🔥</span>';
+  }
+  h += '</div>';
+
+  h += '<div class="dq-blueprint">';
+  h += '<div class="dq-header">';
+  h += '<div class="dq-day">📅 DAILY CHALLENGE</div>';
+  h += '<div class="dq-progress">' + (state.dailyIdx + 1) + '/5</div>';
+  h += '</div>';
+
+  h += '<div class="wc" style="margin-bottom:12px"><div class="wd" style="font-size:28px">' + display + '</div></div>';
+
+  h += '<div class="og" id="dOpts">';
+  for (var oi = 0; oi < opts.length; oi++) {
+    h += '<button class="ob" onclick="checkDaily(this,' + oi + ',' + correct + ')">' + opts[oi] + '</button>';
+  }
+  h += '</div><div class="cd" id="cdEndless"></div>';
+
+  // Rewards info
+  var bonusStr = '';
+  if (state.dailyStreak >= 14) bonusStr = '🔥 x4 Bonus!';
+  else if (state.dailyStreak >= 7) bonusStr = '🔥 x3 Bonus!';
+  else if (state.dailyStreak >= 3) bonusStr = '🔥 x2 Bonus!';
+  else bonusStr = '🔥 x1';
+
+  h += '<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:10px;text-align:center">' + bonusStr + ' • Streak: ' + state.dailyStreak + ' days</div>';
+
+  h += '</div>';
+  document.getElementById("dC").innerHTML = h;
+}
+
+var dailyLock = false;
+
+function checkDaily(el, idx, correct) {
+  if (dailyLock) return;
+  dailyLock = true;
+  var btns = document.querySelectorAll("#dOpts .ob");
+  for (var i = 0; i < btns.length; i++) btns[i].disabled = true;
+  if (idx === correct) {
+    el.classList.add("cr");
+    SOUND.correct();
+    state.dailyStars++;
+    document.getElementById("cdDaily").innerHTML = "<span style='color:var(--tl)'>HIT!</span>";
+  } else {
+    el.classList.add("wr");
+    btns[correct].classList.add("cr");
+    SOUND.wrong();
+    document.getElementById("cdDaily").innerHTML = "<span style='color:var(--rd)'>MISS!</span>";
+  }
+  setTimeout(function() {
+    state.dailyIdx++;
+    dailyLock = false;
+    renderDailyQ();
+  }, 800);
+}
+
+function renderDailyDone() {
+  var multiplier = 1;
+  if (state.dailyStreak >= 14) multiplier = 4;
+  else if (state.dailyStreak >= 7) multiplier = 3;
+  else if (state.dailyStreak >= 3) multiplier = 2;
+
+  var earned = state.dailyStars * multiplier;
+  var h = '<div class="back" onclick="sm(\'m\')">◀ Back</div>';
+
+  // Streak bar
+  h += '<div class="dq-streak-bar">';
+  var maxDots2 = Math.min(state.dailyStreak, 14);
+  for (var s2 = 0; s2 < Math.max(5, maxDots2); s2++) {
+    var cls2 = 'dq-streak-dot';
+    if (s2 < state.dailyStreak) cls2 += ' active';
+    if (s2 >= state.dailyStreak - 1 && s2 < state.dailyStreak && state.dailyStreak > 0) cls2 += ' fire';
+    h += '<span class="' + cls2 + '">🔥</span>';
+  }
+  h += '</div>';
+
+  h += '<div class="rc">';
+  h += '<div style="font-size:48px;margin-bottom:8px">📅</div>';
+  h += '<div style="font-size:24px;font-weight:900;color:var(--gd)">DAILY COMPLETE!</div>';
+  h += '<div style="font-size:14px;color:rgba(255,255,255,0.5);margin:8px 0">Correct: ' + state.dailyStars + '/5</div>';
+  h += '<div style="font-size:20px;color:var(--tl)">+ ' + earned + ' Stars</div>';
+
+  if (multiplier > 1) {
+    h += '<div style="font-size:13px;color:var(--or);margin-top:4px">🔥 x' + multiplier + ' Streak Bonus!</div>';
+  }
+
+  h += '<div style="margin-top:12px;padding:8px;border-radius:10px;background:rgba(255,255,255,0.05)">';
+  h += '<div style="font-size:12px;color:rgba(255,255,255,0.4)">🔥 ' + state.dailyStreak + ' day streak</div>';
+  if (state.dailyStreak >= 14) h += '<div style="font-size:11px;color:var(--or)">★ MAX MULTIPLIER ACHIEVED!</div>';
+  else if (state.dailyStreak >= 7) h += '<div style="font-size:11px;color:var(--gd)">★ 7 days - x3 active!</div>';
+  else if (state.dailyStreak >= 3) h += '<div style="font-size:11px;color:var(--tl)">★ 3 days - x2 active!</div>';
+
+  // Next milestone
+  var nextMs = '';
+  if (state.dailyStreak < 3) nextMs = 3 - state.dailyStreak + ' days to x2';
+  else if (state.dailyStreak < 7) nextMs = 7 - state.dailyStreak + ' days to x3';
+  else if (state.dailyStreak < 14) nextMs = 14 - state.dailyStreak + ' days to MAX';
+  h += '<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px">Next: ' + nextMs + '</div>';
+  h += '</div>';
+
+  h += '</div>';
+
+  document.getElementById("dC").innerHTML = h;
+
+  // Award stars (only if not already awarded today)
+  var todayStr = today();
+  var awarded = localStorage.getItem('seDA_' + todayStr);
+  if (!awarded && earned > 0) {
+    addStars(earned);
+    localStorage.setItem('seDA_' + todayStr, '1');
+    save();
+  }
+}
+
+// ============ INIT ============
+checkDailyReset();
+ui();
+
+// ============ PWA Service Worker Registration ============
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js').then(function(reg) {
+    console.log('[PWA] Service Worker registered:', reg.scope);
+  }).catch(function(err) {
+    console.log('[PWA] Service Worker registration failed:', err);
+  });
+}
+</script>
+</body>
+</html>
