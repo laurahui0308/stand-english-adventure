@@ -206,8 +206,8 @@ body::after{
 .stars-display{display:flex;align-items:center;gap:6px;font-size:var(--font-lg);font-weight:900;color:var(--gold)}
 
 /* ==================== OPTION BUTTONS ==================== */
-.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--spacing-xs);margin-top:16px}
-.option-btn{padding:14px clamp(14px,4vw,20px);border-radius:var(--radius-md);background:var(--bg-card);border:2px solid rgba(224,64,251,0.4);color:var(--white);font-size:var(--font-body);font-weight:700;cursor:pointer;transition:all .15s;min-height:48px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.3;box-shadow:2px 2px 0 rgba(10,5,30,0.4)}
+.options-grid{display:flex;flex-direction:column;gap:var(--spacing-xs);margin-top:16px}
+.option-btn{padding:14px clamp(14px,4vw,20px);border-radius:var(--radius-md);background:var(--bg-card);border:2px solid rgba(224,64,251,0.4);color:var(--white);font-size:var(--font-body);font-weight:700;cursor:pointer;transition:all .15s;min-height:48px;display:flex;align-items:center;justify-content:flex-start;text-align:left;line-height:1.5;box-shadow:2px 2px 0 rgba(10,5,30,0.4)}
 .option-btn:active{transform:scale(.95)}
 .option-btn.correct{border-color:var(--teal)!important;background:rgba(0,212,170,0.12)!important;color:var(--teal)!important;box-shadow:0 0 16px rgba(0,212,170,0.2)}
 .option-btn.wrong{border-color:var(--red)!important;background:rgba(255,45,85,0.08)!important;color:var(--red)!important}
@@ -2666,7 +2666,7 @@ function processBattleAnswer(btn){
     if(playerFighter){ playerFighter.classList.add('player-recoil'); setTimeout(()=>playerFighter.classList.remove('player-recoil'),500); }
     markWordResult(battle._currentWord.en, false);
     flashEffect('MUDA!', 'var(--crimson)');
-    showToast('❌ -1⭐ -15能量！答案: ' + correctAnswer + ' (' + battle._currentWord.en + ')', 'error');
+    showToast('❌ -1⭐ -15能量！答案: ' + correctAnswer + ' (' + battle._currentWord.en + ' = ' + battle._currentWord.zh + ')', 'error');
     speakWordWithTranslation(battle._currentWord.en, battle._currentWord.zh);
 
     if(battle.lives <= 0){
@@ -2847,7 +2847,7 @@ function processDailyAnswer(btn){
   } else {
     sfxWrong();
     state.energy = Math.max(0, state.energy - 5);
-    showToast('❌ -5能量！正确答案: ' + correctAnswer + ' (' + state._dailyWord.en + ') 🔁明天复习', 'error');
+    showToast('❌ -5能量！正确答案: ' + correctAnswer + ' (' + state._dailyWord.en + ' = ' + state._dailyWord.zh + ') 🔁明天复习', 'error');
     speakWordWithTranslation(state._dailyWord.en, state._dailyWord.zh);
     // Reload question after delay — user gets to retry
     setTimeout(function(){ dailyActive = true; loadDailyQuestion(); }, 1500);
@@ -2956,7 +2956,7 @@ function processInfiniteAnswer(btn){
     infCombo = 0;
     updateInfScoreboard();
     flashEffect('MUDA!', 'var(--crimson)');
-    showToast('❌ 正确答案: ' + state._infCorrect + ' (' + state._infWord.en + ')', 'error');
+    showToast('❌ 正确答案: ' + state._infCorrect + ' (' + state._infWord.en + ' = ' + state._infWord.zh + ')', 'error');
     speakWordWithTranslation(state._infWord.en, state._infWord.zh);
   }
   save();
