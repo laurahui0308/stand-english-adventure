@@ -3353,14 +3353,15 @@ function initTTS(){
   };
 }
 function pickBestVoices(voices){
-  var en = null, zh = null;
+  var en = null, zhCN = null, zhOther = null;
   for(var i = 0; i < voices.length; i++){
     var v = voices[i];
     if(v.lang.indexOf('en') === 0 && !en) en = v;
-    if(v.lang.indexOf('zh') === 0 && !zh) zh = v;
+    if(v.lang === 'zh-CN' && !zhCN) zhCN = v;
+    if(v.lang.indexOf('zh') === 0 && v.lang !== 'zh-HK' && v.lang !== 'zh-TW' && !zhOther) zhOther = v;
   }
   _ttsVoiceEN = en || voices[0];
-  _ttsVoiceZH = zh || voices[0];
+  _ttsVoiceZH = zhCN || zhOther || voices[0];
 }
 // Init TTS on first user tap
 document.addEventListener('click', function(){ initTTS(); }, {once: true});
